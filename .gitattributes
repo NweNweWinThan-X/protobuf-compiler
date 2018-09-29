@@ -1,6 +1,6 @@
-/golang export-ignore
-/php export-ignore
-/python export-ignore
+/golang/ export-ignore
+/php/ export-ignore
+/python/ export-ignore
 /.gitattributes export-ignore
 /docker-compose.yml export-ignore
 /README.ja.md export-ignore

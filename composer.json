@@ -1,9 +1,0 @@
-{
-    "name": "mythrnr/grpc-compiler-demo",
-    "description": "gRPC example for PHP",
-    "autoload": {
-        "psr-4": {
-            "": "examples/php/"
-        }
-    }
-}

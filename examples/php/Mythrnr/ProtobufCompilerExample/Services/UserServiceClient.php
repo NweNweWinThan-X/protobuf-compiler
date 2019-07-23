@@ -1,9 +1,10 @@
 <?php
 // GENERATED CODE -- DO NOT EDIT!
 
-namespace Mythrnr\GrpcExample\Services;
+namespace Mythrnr\ProtobufCompilerExample\Services;
 
 /**
+ * user service
  */
 class UserServiceClient extends \Grpc\BaseStub {
 
@@ -17,15 +18,16 @@ class UserServiceClient extends \Grpc\BaseStub {
     }
 
     /**
-     * @param \Mythrnr\GrpcExample\Messages\User $argument input argument
+     * get user request
+     * @param \Mythrnr\ProtobufCompilerExample\Messages\User $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
      */
-    public function Get(\Mythrnr\GrpcExample\Messages\User $argument,
+    public function Get(\Mythrnr\ProtobufCompilerExample\Messages\User $argument,
       $metadata = [], $options = []) {
-        return $this->_simpleRequest('/mythrnr.grpc_example.services.UserService/Get',
+        return $this->_simpleRequest('/mythrnr.protobuf_compiler_examples.services.UserService/Get',
         $argument,
-        ['\Mythrnr\GrpcExample\Messages\User', 'decode'],
+        ['\Mythrnr\ProtobufCompilerExample\Messages\User', 'decode'],
         $metadata, $options);
     }
 

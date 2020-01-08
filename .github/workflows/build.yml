@@ -6,36 +6,65 @@ on:
       - "master"
 
 jobs:
+  login:
+    name: "Login Dockerhub"
+    runs-on: "ubuntu-latest"
+    steps:
+      - run: |
+          docker login \
+            --username ${{ secrets.DOCKERHUB_USERNAME }} \
+            --password ${{ secrets.DOCKERHUB_PASSWORD }}
+
   build:
     name: "Build Compiler"
+    needs: "login"
+    runs-on: "ubuntu-latest"
+    strategy:
+      matrix:
+        language: ["golang", "docs", "python"]
+        protobuf_version: ["3.9.0", "3.11.2"]
+    steps:
+      - uses: "actions/checkout@master"
+      - name: "Build Docker image"
+        env:
+          PECL_GRPC_VERSION: "1.26.0"
+          PROTOC_VERSION: "${{ matrix.protobuf_version }}"
+        run: "docker-compose build ${{ matrix.language }}"
+      - name: "Push Images"
+        run: "docker-compose push ${{ matrix.language }}"
+
+  build-php:
+    name: "Build Compiler for PHP"
+    needs: "login"
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
         protobuf_version: ["3.9.0", "3.11.2"]
     steps:
       - uses: "actions/checkout@master"
-      - name: "Login Dockerhub"
-        run: |
-          docker login \
-            --username ${{ secrets.DOCKERHUB_USERNAME }} \
-            --password ${{ secrets.DOCKERHUB_PASSWORD }}
-      - name: "Build Docker image"
+      - name: "Build Docker image for PHP"
         env:
           PECL_GRPC_VERSION: "1.26.0"
           PROTOC_VERSION: "${{ matrix.protobuf_version }}"
-        run: "docker-compose build"
+        run: "docker-compose build php"
       - name: "Push Images"
-        run: "docker-compose push"
+        run: "docker-compose push php"
 
   build-latest:
-    name: "Build Protobuf 3.11.2"
-    needs: "build"
+    name: "Build Latest Protobuf"
+    needs:
+      - "build"
+      - "build-php"
     runs-on: "ubuntu-latest"
     env:
-      PECL_GRPC_VERSION: "1.26.0"
       PROTOC_VERSION: "3.11.2"
     steps:
-      - uses: "actions/checkout@master"
+      - name: "Pull Images"
+        run: |
+          docker push mythrnr/protobuf-compiler:${PROTOC_VERSION}-docs &
+          docker push mythrnr/protobuf-compiler:${PROTOC_VERSION}-golang &
+          docker push mythrnr/protobuf-compiler:${PROTOC_VERSION}-php &
+          docker push mythrnr/protobuf-compiler:${PROTOC_VERSION}-python &
       - name: "Tag Latest Image"
         run: |
           docker tag \

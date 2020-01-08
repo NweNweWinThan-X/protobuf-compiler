@@ -33,7 +33,7 @@ jobs:
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
-        protobuf_version: ["3.9.0", "3.11.2"]
+        protobuf_version: ["3.11.2"]
     env:
       PECL_GRPC_VERSION: "1.26.0"
       PROTOC_VERSION: "${{ matrix.protobuf_version }}"

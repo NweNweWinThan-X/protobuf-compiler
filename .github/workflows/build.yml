@@ -23,7 +23,7 @@ jobs:
         env:
           PECL_GRPC_VERSION: "1.26.0"
           PROTOC_VERSION: "${{ matrix.protobuf_version }}"
-        run: "docker-compose build --parallel"
+        run: "docker-compose build"
       - name: "Push Images"
         run: "docker-compose push"
 

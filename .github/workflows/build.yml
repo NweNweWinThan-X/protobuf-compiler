@@ -6,14 +6,15 @@ on:
       - "master"
 
 jobs:
-  build-3_9_0:
-    name: "Build Protobuf 3.9.0"
-    runs-on: &os "ubuntu-latest"
+  build:
+    name: "Build Compiler"
+    runs-on: "ubuntu-latest"
+    strategy:
+      matrix:
+        protobuf_version: ["3.9.0", "3.11.2"]
     steps:
-      - &checkout
-        uses: "actions/checkout@master"
-      - &dockerlogin
-        name: "Login Dockerhub"
+      - uses: "actions/checkout@master"
+      - name: "Login Dockerhub"
         run: |
           docker login \
             --username ${{ secrets.DOCKERHUB_USERNAME }} \
@@ -21,24 +22,21 @@ jobs:
       - name: "Build Docker image"
         env:
           PECL_GRPC_VERSION: "1.26.0"
-          PROTOC_VERSION: "3.9.0"
+          PROTOC_VERSION: "${{ matrix.protobuf_version }}"
         run: "docker-compose build --parallel"
       - name: "Push Images"
         run: "docker-compose push"
 
-  build-3_11_2: &task
+  build-latest:
     name: "Build Protobuf 3.11.2"
-    runs-on: *os
+    needs: "build"
+    runs-on: "ubuntu-latest"
+    env:
+      PECL_GRPC_VERSION: "1.26.0"
+      PROTOC_VERSION: "3.11.2"
     steps:
-      - <<: *checkout
-      - <<: *dockerlogin
-      - name: "Build Docker image"
-        env: &latest
-          PECL_GRPC_VERSION: "1.26.0"
-          PROTOC_VERSION: "3.11.2"
-        run: "docker-compose build --parallel"
+      - uses: "actions/checkout@master"
       - name: "Tag Latest Image"
-        env: *latest
         run: |
           docker tag \
             mythrnr/protobuf-compiler:${PROTOC_VERSION}-docs \
@@ -54,7 +52,6 @@ jobs:
             mythrnr/protobuf-compiler:latest-python
       - name: "Push Images"
         run: |
-          docker-compose push &
           docker push mythrnr/protobuf-compiler:latest-docs &
           docker push mythrnr/protobuf-compiler:latest-golang &
           docker push mythrnr/protobuf-compiler:latest-php &
